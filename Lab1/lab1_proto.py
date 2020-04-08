@@ -186,14 +186,34 @@ def dtw(x, y, dist='euclidean',onlyd=False):
     H,K = LD.shape
     AccD = np.zeros_like(LD)
     backpointers = np.zeros((2,H,K))
-
     a = [[1,0],[1,1],[0,1]]
     for h in range(H):
         for k in range(K):
-            ind = np.argmin([AccD[h-1,k],AccD[h-1,k-1],AccD[h,k-1]])
-            AccD[h,k] = LD[h,k] + min([AccD[h-1,k],AccD[h-1,k-1],AccD[h,k-1]])
-            backpointers[:,h,k] = a[ind]
+            if h>0 and k>0:
+                ind = np.argmin([AccD[h-1,k],AccD[h-1,k-1],AccD[h,k-1]])
+                AccD[h,k] = LD[h,k] + np.min([AccD[h-1,k],AccD[h-1,k-1],AccD[h,k-1]])
+                backpointers[:,h,k] = a[ind]
+
+            elif k>0 and h==0:
+                ind = 2
+                AccD[h,k] = LD[h,k] + AccD[h,k-1]
+                backpointers[:,h,k] = a[ind]
+                
+            elif h>0 and k==0:
+                ind = 0
+                AccD[h,k] = LD[h,k] + AccD[h-1,k]
+                backpointers[:,h,k] = a[ind]
+
+            elif h==0 and k==0:
+#                 ind = 1
+                AccD[h,k] = LD[h,k]
+                backpointers[:,h,k] = [0,0]
+            else:
+                print("error")
+
+                
     d = AccD[-1,-1]
+    d = d/(H+K)
     if onlyd:
         return d
 
@@ -202,10 +222,8 @@ def dtw(x, y, dist='euclidean',onlyd=False):
     h = H-1
     k = K-1
     while True:
-        path = path+[[h,k]]
+        path = path+[[k,h]]
         h,k = np.array([h,k])-np.array(backpointers[:,h,k],dtype=int)
-        if h<0 or k<0:
+        if h==0 and k==0:
             break
-    
-
     return d,AccD,path,LD
