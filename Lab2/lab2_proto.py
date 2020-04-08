@@ -1,6 +1,7 @@
 import numpy as np
 from lab2_tools import *
 
+
 def concatTwoHMMs(hmm1, hmm2):
     """ Concatenates 2 HMM models
 
@@ -103,6 +104,7 @@ def forward(log_emlik, log_startprob, log_transmat):
         log_startprob: log probability to start in state i                    log P(Xi)
         log_transmat: log transition probability from state i to j            log P(Xj|Xi)
 
+
     Output:
         forward_prob: NxM array of forward log probabilities for each of the M states in the model
     """
@@ -135,6 +137,7 @@ def backward(log_emlik, log_startprob, log_transmat):
 
 def viterbi(log_emlik, log_startprob, log_transmat, forceFinalState=True):
     """Viterbi path(decoding).
+
 
     Args:
         log_emlik: NxM array of emission log likelihoods, N frames, M states

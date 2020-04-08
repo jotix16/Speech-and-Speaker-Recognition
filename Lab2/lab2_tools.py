@@ -35,4 +35,5 @@ def log_multivariate_normal_density_diag(X, means, covars):
                   + np.sum((means ** 2) / covars, 1) # [n_comp x 1]
                   - 2 * np.dot(X, (means / covars).T) # [n_observations x n_comp]
                   + np.dot(X ** 2, (1.0 / covars).T)) # [n_observations x n_comp]
+
     return lpr
