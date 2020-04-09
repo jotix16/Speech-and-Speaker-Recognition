@@ -96,15 +96,14 @@ def gmmloglik(log_emlik, weights):
         gmmloglik: scalar, log likelihood of data given the GMM model.
     """
 
-def forward(log_emlik, log_startprob, log_transmat):
+def forward(log_emlik, log_startprob, log_transmat, obs_log_ll = False ):
     """Forward (alpha) probabilities in log domain.
 
     Args:
         log_emlik: NxM array of emission log likelihoods, N frames, M states  log P(Oi|Xi)
         log_startprob: log probability to start in state i                    log P(Xi)
         log_transmat: log transition probability from state i to j            log P(Xj|Xi)
-
-
+        obs_log_ll: True if we want the function to return both the alpha matrix and the log likelihood of seq.
     Output:
         forward_prob: NxM array of forward log probabilities for each of the M states in the model
     """
@@ -120,7 +119,10 @@ def forward(log_emlik, log_startprob, log_transmat):
     for n in range(1,N):
         for i in range(M):
             forward_prob[n,i] = logsumexp(forward_prob[n-1,:]+log_transmat[:,i] ) + log_emlik[n,i]
-
+    
+    if obs_log_ll:
+        return forward_prob,  logsumexp(forward_prob[-1,:])  
+    
     return forward_prob
 
 def backward(log_emlik, log_startprob, log_transmat):
@@ -197,6 +199,7 @@ def statePosteriors(log_alpha, log_beta):
     Output:
         log_gamma: NxM array of gamma probabilities for each of the M states in the model
     """
+    return log_alpha + log_beta - logsumexp(log_alpha[-1,:])
 
 def updateMeanAndVar(X, log_gamma, varianceFloor=5.0):
     """ Update Gaussian parameters with diagonal covariance
@@ -213,3 +216,19 @@ def updateMeanAndVar(X, log_gamma, varianceFloor=5.0):
          means: MxD mean vectors for each state
          covars: MxD covariance (variance) vectors for each state
     """
+    D = X.shape[1]
+    N, M = log_gamma.shape
+    means = np.zeros((M, D))
+    covars = np.zeros((M, D))
+    
+    gamma = np.exp(log_gamma)
+
+    means = gamma.T[:,:,np.newaxis]*X[np.newaxis,:,:] # NxMxD
+    means = means .sum(1)
+    means = means/ gamma.sum(0).T[:,np.newaxis]
+    
+    X_mu = X[:,np.newaxis,:]-means[np.newaxis,:,:]# NxMxD
+    X_mu_2 = X_mu *X_mu
+    covars = (X_mu_2*gamma[:,:,np.newaxis]).sum(0)/ gamma.sum(0).T[:,np.newaxis]
+    covars[covars < varianceFloor] = varianceFloor
+    return means,covars
