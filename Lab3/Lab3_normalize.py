@@ -1,0 +1,104 @@
+import numpy as np
+import pickle
+from sklearn.preprocessing import StandardScaler
+from keras.utils import np_utils
+
+
+_, stateList, _ = pickle.load( open('saved_files/phoneHMM_states.pkl', 'rb'))
+output_dim = len(stateList)
+stateList = None
+
+
+print("LMFCC")
+print("Loading training set")
+with np.load('datas/lmfcc_train_x.npz', allow_pickle=True) as data:
+    lmfcc_x = data['lmfcc_x']
+    targets = data['targets']
+
+scaler = StandardScaler()
+scaler.fit(lmfcc_x)
+lmfcc_x = scaler.transform(lmfcc_x).astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+print("Saving normalized training set")
+np.savez('datas/lmfcc_train_x_reg.npz', lmfcc_x=lmfcc_x, targets=targets)
+
+
+# test
+lmfcc_x = None
+targets = None
+print("\nLoading test set")
+with np.load('datas/lmfcc_test_x.npz', allow_pickle=True) as data:
+   lmfcc_x = data['lmfcc_x']
+   targets = data['targets']
+lmfcc_x = scaler.transform(lmfcc_x).astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+print("Saving normalized test set")
+np.savez('datas/lmfcc_test_x_reg.npz', lmfcc_x=lmfcc_x, targets=targets)
+
+
+
+
+#valid
+lmfcc_x = None
+targets = None
+print("\nLoading validation set")
+with np.load('datas/lmfcc_val_x.npz', allow_pickle=True) as data:
+   lmfcc_x = data['lmfcc_x']
+   targets = data['targets']
+lmfcc_x = scaler.transform(lmfcc_x).astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+print("Saving normalized validation set")
+np.savez('datas/lmfcc_val_x_reg.npz', lmfcc_x=lmfcc_x, targets=targets)
+      
+      
+scaler = None     
+#####      
+      
+#mspec
+mfcc_x = None
+targets = None
+print("\n\nMSPEC")
+print("Loading training set")
+with np.load('datas/mspec_train_x.npz', allow_pickle=True) as data:
+    lmfcc_x = data['mspec_x']
+    targets = data['targets']
+lmfcc_x = lmfcc_x.astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+mean = lmfcc_x.mean(0)[np.newaxis,:]
+std = lmfcc_x.std(0)[np.newaxis,:]
+
+
+print("Saving normalized training set")
+np.savez('datas/mspec_train_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)
+
+
+# test
+lmfcc_x = None
+targets = None
+print("\nLoading test set")
+with np.load('datas/mspec_test_x.npz', allow_pickle=True) as data:
+   lmfcc_x = data['mspec_x']
+   targets = data['targets']
+lmfcc_x =lmfcc_x.astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+print("Saving normalized test set")
+np.savez('datas/mspec_test_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)
+
+
+#valid
+lmfcc_x = None
+targets = None
+print("\nLoading validation set")
+with np.load('datas/mspec_val_x.npz', allow_pickle=True) as data:
+   lmfcc_x = data['mspec_x']
+   targets = data['targets']
+lmfcc_x = lmfcc_x.astype('float32')
+targets = np_utils.to_categorical(targets, output_dim)
+
+print("Saving normalized validation set")
+np.savez('datas/mspec_val_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)

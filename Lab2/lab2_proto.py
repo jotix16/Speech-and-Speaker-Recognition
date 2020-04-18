@@ -166,7 +166,7 @@ def viterbi(log_emlik, log_startprob, log_transmat, forceFinalState=True):
     log_transmat = log_transmat[:-1,:-1]
 
     N, M = log_emlik.shape
-    V = np.zeros((N,M)) # Viterbi loglikelihoods
+    V = np.ones((N,M)) # Viterbi loglikelihoods
     V_path = np.zeros((N,M),dtype=np.int64) # Viterbi indexes
     
     viterbi_path = np.zeros(N,dtype=np.int64)
@@ -180,8 +180,12 @@ def viterbi(log_emlik, log_startprob, log_transmat, forceFinalState=True):
             # best previous state in time n-1 that brought us to state i in time n
             V_path[n,i] = np.argmax(V[n-1,:]+log_transmat[:,i] + log_emlik[n,i])
     
-    # path backtracking 
-    viterbi_path[-1] = np.argmax(V[-1,:])
+    # path backtracking
+    if forceFinalState:
+        viterbi_path[-1] = M-1
+    else:
+        viterbi_path[-1] = np.argmax(V[-1,:])
+	
     for i in range(V_path.shape[0]-2,0,-1):
         viterbi_path[i] = V_path[i+1,viterbi_path[i+1]]
 

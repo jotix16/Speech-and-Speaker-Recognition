@@ -47,11 +47,12 @@ def frames2trans(sequence, outfilename=None, timestep=0.01):
     end = 0
     trans = ''
     for t in range(len(sequence)):
-        if sequence[t] != sym:
+        if sequence[t] != sym: #not start symbol
             trans = trans + str(start) + ' ' + str(end) + ' ' + sym + '\n'
             sym = sequence[t]
             start = end
         end = end + timestep
+        
     trans = trans + str(start) + ' ' + str(end) + ' ' + sym + '\n'
     if outfilename != None:
         with open(outfilename, 'w') as f:
