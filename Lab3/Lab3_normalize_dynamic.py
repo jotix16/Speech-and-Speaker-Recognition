@@ -55,50 +55,50 @@ np.savez('datas/lmfcc_val_x_reg.npz', lmfcc_x=lmfcc_x, targets=targets)
       
       
 scaler = None     
-#####      
+#####=================================================================================#####      
       
 #mspec
-mfcc_x = None
+lmfcc_x = None
 targets = None
 print("\n\nMSPEC")
 print("Loading training set")
 with np.load('datas/mspec_train_x.npz', allow_pickle=True) as data:
-    lmfcc_x = data['mspec_x']
+    mspec_x = data['mspec_x']
     targets = data['targets']
-lmfcc_x = lmfcc_x.astype('float32')
+mspec_x = mspec_x.astype('float32')
 targets = np_utils.to_categorical(targets, output_dim)
 
-mean = lmfcc_x.mean(0)[np.newaxis,:]
-std = lmfcc_x.std(0)[np.newaxis,:]
+mean = mspec_x.mean(0)[np.newaxis,:]
+std = mspec_x.std(0)[np.newaxis,:]
 
 
 print("Saving normalized training set")
-np.savez('datas/mspec_train_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)
+np.savez('datas/mspec_train_x_reg.npz', mspec_x=(mspec_x-mean)/std, targets=targets)
 
 
 # test
-lmfcc_x = None
+mspec_x = None
 targets = None
 print("\nLoading test set")
 with np.load('datas/mspec_test_x.npz', allow_pickle=True) as data:
-   lmfcc_x = data['mspec_x']
+   mspec_x = data['mspec_x']
    targets = data['targets']
-lmfcc_x =lmfcc_x.astype('float32')
+mspec_x =mspec_x.astype('float32')
 targets = np_utils.to_categorical(targets, output_dim)
 
 print("Saving normalized test set")
-np.savez('datas/mspec_test_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)
+np.savez('datas/mspec_test_x_reg.npz', mspec_x=(mspec_x-mean)/std, targets=targets)
 
 
 #valid
-lmfcc_x = None
+mspec_x = None
 targets = None
 print("\nLoading validation set")
 with np.load('datas/mspec_val_x.npz', allow_pickle=True) as data:
-   lmfcc_x = data['mspec_x']
+   mspec_x = data['mspec_x']
    targets = data['targets']
-lmfcc_x = lmfcc_x.astype('float32')
+mspec_x = mspec_x.astype('float32')
 targets = np_utils.to_categorical(targets, output_dim)
 
 print("Saving normalized validation set")
-np.savez('datas/mspec_val_x_reg.npz', lmfcc_x=(lmfcc_x-mean)/std, targets=targets)
+np.savez('datas/mspec_val_x_reg.npz', mspec_x=(mspec_x-mean)/std, targets=targets)

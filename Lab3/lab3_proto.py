@@ -147,6 +147,40 @@ def create_dynamic_features(data):
 
 
 
+def create_non_dynamic_features(data):
+    """
+    data: list of dictionaries with keys: 'lmfcc', 'mspec' and 'targets'
+    
+    output: lmfcc_features: [NxD_lmfcc] where N is nr of all concatinated samples of all words in data
+            mspec_features: [NxD_mspec] where N is nr of all concatinated samples of all words in data
+            targets: [N,] index of state for each sample
+    """
+    
+    D_lmfcc = data[0]['lmfcc'].shape[1]
+    D_mspec = data[0]['mspec'].shape[1]
+    # Features to be returned
+    N = sum([len(x['targets']) for x in data])
+    print(N)
+    lmfcc_x = np.zeros((N,D_lmfcc))
+    mspec_x = np.zeros((N,D_mspec))
+    
+    # Targets to be returned
+    targets = []
+    # through all data
+    k = 0
+    for x in tqdm(data): 
+        times, dim = x['lmfcc'].shape
+        ## for each timestep
+        for i in range(times):
+            lmfcc_x[k,:]=x['lmfcc'][i,:]
+            mspec_x[k,:]=x['mspec'][i,:]
+            k +=1
+        # lmfcc_x = np.vstack((lmfcc_x, lmfcc_features))
+        #mspec_x = np.vstack((mspec_x, mspec_features))
+        targets = targets + x['targets']
+    return lmfcc_x, mspec_x, targets
+
+
 
 
 
