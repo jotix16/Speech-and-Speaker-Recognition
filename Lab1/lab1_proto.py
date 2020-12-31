@@ -22,7 +22,7 @@ def mspec(samples, winlen = 400, winshift = 200, preempcoeff=0.97, nfft=512, sam
     Returns:
         N x nfilters array with mel filterbank features (see trfbank for nfilters)
     """
-    frames = enframe(samples,samplingrate, winlen, winshift)
+    frames = enframe(samples, winlen, winshift)
     preemph = preemp(frames, preempcoeff)
     windowed = windowing(preemph)
     spec = powerSpectrum(windowed, nfft)
@@ -50,26 +50,33 @@ def mfcc(samples, winlen = 400, winshift = 200, preempcoeff=0.97, nfft=512, ncep
 
 # Functions to be implemented ----------------------------------
 
-def enframe(samples,samplingrate, winlen, winshift):
+def enframe(samples, winlen, winshift, samplingrate = None):
     """
     Slices the input samples into overlapping windows.
 
     Args:
         winlen: window length in samples.
         winshift: shift of consecutive windows in samples
+        samplingrate: is not None when winlen and winshift are given in ms
     Returns:
         numpy array [N x winlen], where N is the number of windows that fit
         in the input signal
     """
-    N = len(samples)
-    result = np.array(samples[0:winlen],dtype='float64')
-    i = winshift
-    while True:
-        if i+winlen>=N:
-            break
-        result=np.vstack((result,samples[i:i+winlen]))
-        i = i + winshift
-    return result
+    if samplingrate is not None and samplingrate < 50: # <50 to capture cases when samplingrate is given eventhough the lenght are given in nr of samples
+        srate=int(samplingrate/1000) # samples per ms
+        winlen = srate * winlen # length of frame in nr of samples
+        winshift = srate * winshift # shift of frames in nr of samples
+
+    N = int((len(samples) - winlen) / winshift + 1) # nr of frames
+    print("We are creating {} frames with {} samples each and {} samples overlapping.".format(N, winlen, winshift))
+    frames = np.zeros((N, winlen))
+    frames[0,:] = samples[:winlen]
+
+    ix = winshift
+    for i in range(1, N):
+        frames[i,:] = samples[ix:ix+winlen]
+        ix += winshift
+    return frames
     
 def preemp(input, p=0.97):
     """
